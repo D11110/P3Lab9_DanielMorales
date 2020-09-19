@@ -7,6 +7,7 @@ using namespace std;
 #include <sstream>
 #include <cstring>
 #include <vector>
+#include <algorithm>
 #include <string>
 
 int main(int argc, char *argv[])
@@ -62,28 +63,27 @@ int main(int argc, char *argv[])
             {
                 atributoClaseLinea.push_back(cadenaResultanteLineaClase);
             }
-
-            for (size_t x = 0; x < atributoClaseLinea.size(); x++)
-            {
-                vector<string> atributos;
-
-                string atribAct = atributoClaseLinea.at(x);
-                stringstream streamDeAtributos(atribAct);
-                string atribResultante;
-
-                int contador = 0;
-
-                while (getline(streamDeAtributos, atribResultante, ':'))
-                {
-                    if (contador % 2 == 1)
-                    {
-                        atribIndividual.push_back(atribResultante);
-                    }
-                    contador++;
-                }
-            }
         }
 
+        for (size_t i = 0; i < atributoClaseLinea.size(); i++)
+        {
+            vector<string> atributos;
+
+            string atribAct = atributoClaseLinea.at(i);
+            stringstream streamDeAtributos(atribAct);
+            string atribResultante;
+
+            int contador = 0;
+
+            while (getline(streamDeAtributos, atribResultante, ':'))
+            {
+                if (contador % 2 == 1)
+                {
+                    atribIndividual.push_back(atribResultante);
+                }
+                contador++;
+            }
+        }
         string nombreArchivoCPP = atribIndividual[0];
         nombreArchivoCPP += ".cpp";
         string nombreArchivoH = atribIndividual[0];
@@ -98,6 +98,8 @@ int main(int argc, char *argv[])
             archivoSalidaCPP << "#include \"" << nombreArchivoH << "\"" << endl;
             archivoSalidaCPP << endl;
 
+            archivoSalidaCPP << "using namespace std;\n\n";
+
             archivoSalidaCPP << nombreArchivo << "::" << nombreArchivo << "(){ \n }";
             archivoSalidaCPP << endl;
             archivoSalidaCPP << endl;
@@ -107,10 +109,10 @@ int main(int argc, char *argv[])
             vector<string> nombresAtribs;
             vector<string> tipoAtribs;
 
-            for (size_t m = 0; m < atribIndividual.size(); m++)
+            for (size_t i = 0; i < atribIndividual.size(); i++)
             {
 
-                string atribLineaActual = atribIndividual.at(m);
+                string atribLineaActual = atribIndividual.at(i);
                 stringstream streamAtLinAct(atribLineaActual);
                 string stringResultante;
 
@@ -121,78 +123,157 @@ int main(int argc, char *argv[])
                     if (contadorAtribs % 2 == 1)
                     {
                         nombresAtribs.push_back(stringResultante);
+                        contadorAtribs++;
                     }
-                    else
+                    else if (contadorAtribs % 2 == 0)
                     {
                         tipoAtribs.push_back(stringResultante);
+                        contadorAtribs++;
                     }
-                    contadorAtribs++;
                 }
             }
 
             archivoSalidaCPP << nombreArchivo << "::" << nombreArchivo << "(";
 
-            for (size_t k = 0; k < nombresAtribs.size(); k++)
+            for (size_t i = 0; i < nombresAtribs.size(); i++)
             {
-                if (k == nombresAtribs.size() - 1)
+                if (i == nombresAtribs.size() - 1)
                 {
-                    archivoSalidaCPP << tipoAtribs.at(k) << " "
-                                     << "_" << nombresAtribs.at(k) << "){ \n";
+                    archivoSalidaCPP << tipoAtribs.at(i) << " "
+                                     << "_" << nombresAtribs.at(i) << "){ \n";
                 }
                 else
                 {
-                    archivoSalidaCPP << tipoAtribs.at(k) << " "
-                                     << "_" << nombresAtribs.at(k) << ",";
+                    archivoSalidaCPP << tipoAtribs.at(i) << " "
+                                     << "_" << nombresAtribs.at(i) << ",";
                 }
             }
 
-            for (size_t l = 0; l < nombresAtribs.size(); l++)
+            for (size_t i = 0; i < nombresAtribs.size(); i++)
             {
-                archivoSalidaCPP << "\t" << nombresAtribs.at(l) << " = "
-                                 << "_" << nombresAtribs.at(l) << ";\n";
+                archivoSalidaCPP << "\t" << nombresAtribs.at(i) << " = "
+                                 << "_" << nombresAtribs.at(i) << ";\n";
             }
             archivoSalidaCPP << "}";
             archivoSalidaCPP << endl;
             archivoSalidaCPP << endl;
             archivoSalidaCPP << endl;
 
-            for (size_t b = 0; b < nombresAtribs.size(); b++)
+            for (size_t i = 0; i < nombresAtribs.size(); i++)
             {
-                archivoSalidaCPP << "void " << nombreArchivo << "::set_" << nombresAtribs.at(b) << "(" << tipoAtribs.at(b) << " _" << nombresAtribs.at(b) << "){\n";
-                archivoSalidaCPP << "\t" << nombresAtribs.at(b) << " = "
-                                 << "_" << nombresAtribs.at(b) << ";\n";
+                archivoSalidaCPP << "void " << nombreArchivo << "::set_" << nombresAtribs.at(i) << "(" << tipoAtribs.at(i) << " _" << nombresAtribs.at(i) << "){\n";
+                archivoSalidaCPP << "\t" << nombresAtribs.at(i) << " = "
+                                 << "_" << nombresAtribs.at(i) << ";\n";
                 archivoSalidaCPP << "}\n";
             }
 
-            for (size_t o = 0; o < nombresAtribs.size(); o++)
+            for (size_t i = 0; i < nombresAtribs.size(); i++)
             {
-                archivoSalidaCPP << tipoAtribs.at(o) << " " << nombreArchivo << "::get_" << nombresAtribs.at(o) << "(){\n";
+                archivoSalidaCPP << tipoAtribs.at(i) << " " << nombreArchivo << "::get_" << nombresAtribs.at(i) << "(){\n";
                 archivoSalidaCPP << "\t"
-                                 << "return " << nombresAtribs.at(o) << ";\n";
+                                 << "return " << nombresAtribs.at(i) << ";\n";
                 archivoSalidaCPP << "}\n";
             }
 
-            archivoSalidaCPP << "string " << nombreArchivo << "::toString(){\n"; 
-            archivoSalidaCPP << "return ";
+            archivoSalidaCPP << "string " << nombreArchivo << "::toString(){\n";
+            string nombreArchivoUpper = nombreArchivo;
+
+            std::for_each(nombreArchivoUpper.begin(), nombreArchivoUpper.end(), [](char &c) {
+                c = ::toupper(c);
+            });
+
+            archivoSalidaCPP << "\t"
+                             << "return "
+                             << "\"" << nombreArchivoUpper << "-> ";
+
+            for (size_t i = 0; i < nombresAtribs.size(); i++)
+            {
+                if (i == 0)
+                {
+                    archivoSalidaCPP << " " << nombresAtribs.at(i) << ": \""
+                                     << "+" << nombresAtribs.at(i) << "+";
+                }
+                else if (i == nombresAtribs.size() - 1)
+                {
+                    if (tipoAtribs.at(i) == "int" || tipoAtribs.at(i) == "double")
+                    {
+                        archivoSalidaCPP << "\"|" << nombresAtribs.at(i) << ": \""
+                                         << "+to_string(" << nombresAtribs.at(i) << ");\n}\n";
+                    }
+                    else
+                    {
+                        archivoSalidaCPP << "\"|" << nombresAtribs.at(i) << ": \""
+                                         << "+" << nombresAtribs.at(i) << ";\n}\n";
+                    }
+                }
+                else
+                {
+                    if (tipoAtribs.at(i) == "int" || tipoAtribs.at(i) == "double")
+                    {
+                        archivoSalidaCPP << "\"|" << nombresAtribs.at(i) << ": \""
+                                         << "+to_string(" << nombresAtribs.at(i) << ")+";
+                    }
+                    else
+                    {
+                        archivoSalidaCPP << "\"|" << nombresAtribs.at(i) << ": \""
+                                         << "+" << nombresAtribs.at(i) << "+";
+                    }
+                }
+            }
+
+            archivoSalidaCPP << nombreArchivo << "::~" << nombreArchivo << "(){\n}";
+
+            ofstream archivoSalidaH;
+            archivoSalidaH.open(nombreArchivoH);
+
+            archivoSalidaH << "#ifndef " << nombreArchivoUpper << "_H\n";
+            archivoSalidaH << "#define " << nombreArchivoUpper << "_H\n";
+
+            archivoSalidaH << "#include <string> \n";
+
+            archivoSalidaH << "class " << nombreArchivo << "{\n";
+            archivoSalidaH << "\tprivate:\n";
+
+            for (size_t i = 0; i < nombresAtribs.size(); i++)
+            {
+                archivoSalidaH << "\t\t" << tipoAtribs.at(i) << " " << nombresAtribs.at(i) << ";\n";
+            }
+
+            archivoSalidaH << "\tpublic:\n";
+            archivoSalidaH << "\t\t" << nombreArchivo << "();\n";
+            archivoSalidaH << "\t\t" << nombreArchivo << "(";
+
+            for (size_t i = 0; i < tipoAtribs.size(); i++)
+            {
+                if (i == tipoAtribs.size() - 1)
+                {
+                    archivoSalidaH << tipoAtribs.at(i) << ");\n";
+                }
+                else
+                {
+                    archivoSalidaH << tipoAtribs.at(i) << ",";
+                }
+            }
+
+            for (size_t i = 0; i < nombresAtribs.size(); i++)
+            {
+                archivoSalidaH << "\t\tvoid set_" << nombresAtribs.at(i) << "(" << tipoAtribs.at(i) << ");\n";
+            }
+
+            for (size_t i = 0; i < nombresAtribs.size(); i++)
+            {
+                archivoSalidaH << "\t\t" << tipoAtribs.at(i) << " get_" << nombresAtribs.at(i) << "();\n";
+            }
+
+            archivoSalidaH << "\t\tstring toString();\n";
+            archivoSalidaH << "\t\t~" << nombreArchivo << "();\n";
+            archivoSalidaH << ");\n";
+            archivoSalidaH << "#endif\n";
         }
         else
         {
+            std::cout << "El archivo no se ha podido abrir" << std::endl;
         }
-
-        // for (size_t i = 0; i < atribIndividual.size(); i++)
-        // {
-        //     cout << atribIndividual.at(i) << endl;
-        // }
-
-        // for (size_t i = 0; i < clases.size(); i++)
-        // {
-        //     cout << clases.at(i) << endl;
-        // }
-
-        // for (size_t i = 0; i < clase.size(); i++)
-        // {
-        //     cout << clase.at(i) << endl;
-        // }
     }
     catch (const std::exception &e)
     {
